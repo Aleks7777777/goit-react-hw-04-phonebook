@@ -1,7 +1,7 @@
 import { Component } from 'react';
-import AddContactForm from './AddContactForm/AddContactForm';
-import ContactList from './ContactList/ContactList';
-import ContactFiltr from './ContactFiltr/ContactFiltr';
+import AddContactForm from './AddContactForm';
+import ContactList from './ContactList';
+import ContactFiltr from './ContactFiltr';
 import { Title, Div } from './Style.styled';
 
 class Contact extends Component {

@@ -1,34 +1,48 @@
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 import AddContactForm from './AddContactForm';
 import ContactList from './ContactList';
 import ContactFiltr from './ContactFiltr';
 import { Title, Div } from './Style.styled';
+import { getLocalData } from '../Helpers/getLocalData';
 
-class Contact extends Component {
-	state = {
-		contactList: [],
-		filter: '',
-	};
 
-	handleChangeFilter = e => {
+const LOCAL_CONTACT_KEY = 'localContactKey';
+
+const Contact = () => {
+	const [contactList, setContactList] = useState(
+		() => getLocalData(LOCAL_CONTACT_KEY) ?? []
+	);
+	const [filter, setFilter] = useState('');
+
+	useEffect(() => {
+		const savedContactList = JSON.parse(
+			localStorage.getItem(LOCAL_CONTACT_KEY)
+		);
+		if (savedContactList) {
+			setContactList(savedContactList);
+		}
+	}, []);
+
+	useEffect(() => {
+		localStorage.setItem(LOCAL_CONTACT_KEY, JSON.stringify(contactList));
+	}, [contactList]);
+
+	const handleChangeFilter = e => {
 		const { value } = e.target;
-		this.setState({ filter: value });
+		setFilter(value);
 	};
-	handleFilterFilms = e => {
-		const { contactList, filter } = this.state;
-
+	const handleFilterFilms = () => {
 		return contactList.filter(item =>
 			item.name.toLowerCase().includes(filter.toLowerCase())
 		);
 	};
-	hanleDeleteContact = id => {
-		this.setState(prevState => ({
-			contactList: prevState.contactList.filter(item => item.id !== id),
-		}));
+	const hanleDeleteContact = id => {
+		setContactList(prev => prev.filter(item => item.id !== id));
 	};
-	hanleAddContact = newContact => {
+
+	const hanleAddContact = newContact => {
 		if (
-			this.state.contactList.some(
+			contactList.some(
 				contact =>
 					contact.name.toLowerCase().trim() ===
 					newContact.name.toLowerCase().trim()
@@ -36,25 +50,20 @@ class Contact extends Component {
 		) {
 			return alert('ERRROR');
 		}
-		this.setState(prevState => ({
-			contactList: [...prevState.contactList, newContact],
-		}));
+		setContactList(prev => [...prev, newContact]);
 	};
 
-	render() {
-		const { filter } = this.state;
-		return (
-			<Div>
-				<AddContactForm onAddContact={this.hanleAddContact} />
-				<Title>Contacts</Title>
-				<ContactFiltr onChange={this.handleChangeFilter} name={filter} />
-				<ContactList
-					contactList={this.handleFilterFilms()}
-					onDeleteContact={this.hanleDeleteContact}
-				/>
-			</Div>
-		);
-	}
-}
+	return (
+		<Div>
+			<AddContactForm onAddContact={hanleAddContact} />
+			<Title>Contacts</Title>
+			<ContactFiltr onChange={handleChangeFilter} name={filter} />
+			<ContactList
+				contactList={handleFilterFilms()}
+				onDeleteContact={hanleDeleteContact}
+			/>
+		</Div>
+	);
+};
 
 export default Contact;
